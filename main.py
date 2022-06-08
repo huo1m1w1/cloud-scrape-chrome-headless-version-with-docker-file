@@ -66,7 +66,7 @@ driver = image_scrape.Web_driver()
 image_scrape.driver.execute_script("window.open('');")
 image_scrape.driver.switch_to.window(image_scrape.driver.window_handles[0])
 
-for i in range(2):
+for i in range(10):
 
     collection = image_scrape.get_collection_title(i)
     links = image_scrape.get_image_addresses_of_the_collection(collection)
