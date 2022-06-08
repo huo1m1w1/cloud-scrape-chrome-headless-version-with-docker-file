@@ -9,7 +9,7 @@ import pandas as pd
 from security_keys import access_key
 from security_keys import secret_key
 import boto3
-import os
+
 
 class Image_scraper:
 
@@ -35,13 +35,13 @@ class Image_scraper:
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920x1080")
         options.add_argument("start-maximised")
-        options.add_argument("user-agent=[Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36]")
+        options.add_argument(
+            "user-agent=[Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36]"
+        )
         s = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=s, options=options)               
-        # self.driver.get("chrome://settings/")
-        # self.driver.execute_script("chrome.settingsPrivate.setDefaultZoom(0.20);")
-        return self.driver.get(url)
+        self.driver = webdriver.Chrome(service=s, options=options)
 
+        return self.driver.get(url)
 
     def get_collection_title(self, index):
 
@@ -49,8 +49,7 @@ class Image_scraper:
         Get collections from previous collected ranking data table.
         """
 
-        # return self.df.iat[index, 2]  # Using .iat attribute
-        return self.df['Collection'].iloc[index]
+        return self.df["Collection"].iloc[index]
 
     def get_image_addresses_of_the_collection(self, collection):
 
@@ -66,7 +65,7 @@ class Image_scraper:
         elem.send_keys(collection)
         time.sleep(2)
         self.driver.find_element(
-            By.XPATH, '//*[@id="NavSearch--results"]/li[2]/a/div[2]/div/div/span'                     
+            By.XPATH, '//*[@id="NavSearch--results"]/li[2]/a/div[2]/div/div/span'
         ).click()
 
         # scroll the page to an appropriate level
@@ -74,8 +73,7 @@ class Image_scraper:
         time.sleep(2)
         level = self.driver.find_element(
             By.CSS_SELECTOR,
-            # "#main > div > div > div.sc-1xf18x6-0.sc-z0wxa3-0.gczeyg.bEVkke > div > div.sc-1po1rbf-6.bUKivE > div.sc-1xf18x6-0.bozbIq.AssetSearchView--main > div.AssetSearchView--results.collection--results.AssetSearchView--results--phoenix > div.sc-1xf18x6-0.hDbqle.AssetsSearchView--assets",
-            "#main > div > div > div.sc-1xf18x6-0.sc-z0wxa3-0.gczeyg.hWJuuu > div > div.sc-1po1rbf-6.bUKivE > div.sc-1xf18x6-0.bozbIq.AssetSearchView--main > div.AssetSearchView--results.collection--results.AssetSearchView--results--phoenix > div.fresnel-container.fresnel-greaterThanOrEqual-md > div > p"
+            "#main > div > div > div.sc-1xf18x6-0.sc-z0wxa3-0.gczeyg.hWJuuu > div > div.sc-1po1rbf-6.bUKivE > div.sc-1xf18x6-0.bozbIq.AssetSearchView--main > div.AssetSearchView--results.collection--results.AssetSearchView--results--phoenix > div.fresnel-container.fresnel-greaterThanOrEqual-md > div > p",
         )
 
         self.driver.execute_script("arguments[0].scrollIntoView(true);", level)
@@ -95,9 +93,7 @@ class Image_scraper:
         The reason for doing this way is because the iamge quality on the
         item own page better than on the collection page.
         """
-        # open seconf window/tag,
-        # self.driver.execute_script("window.open('');")
-        # Switch to the new window
+
         self.driver.switch_to.window(self.driver.window_handles[1])
 
         session = boto3.Session(
@@ -108,8 +104,9 @@ class Image_scraper:
 
         for i in range(len(links) - 1):
             self.driver.get(links[i + 1])
+
             # switch to the link in a new tab by sending key strokes on the element
-            # d = self.driver.find_elements(By.XPATH, '//div[@role = "gridcell"]')
+
             time.sleep(1)
             image = self.driver.find_element(
                 By.XPATH,
@@ -122,26 +119,21 @@ class Image_scraper:
             time.sleep(5)
         self.driver.switch_to.window(self.driver.window_handles[0])
 
-
     def collect_images1(self, links, path):
         """
         Open another window for each NFT item, get the image and save to drive.
         The reason for doing this way is because the iamge quality on the item own page better than on
         the collection page.
         """
-        # open seconf window/tag,
-        # self.driver.execute_script("window.open('');")
+
         # Switch to the new window
         self.driver.switch_to.window(self.driver.window_handles[1])
-
-        # self.second_url = self.driver.current_window_handle
 
         for i in range(len(links) - 1):
             try:
 
                 self.driver.get(links[i + 1])
-                # switch to the link in a new tab by sending key strokes on the element
-                # d = self.driver.find_elements(By.XPATH, '//div[@role = "gridcell"]')
+
                 time.sleep(1)
                 image = self.driver.find_element(
                     By.XPATH,
@@ -155,10 +147,6 @@ class Image_scraper:
 
         self.driver.switch_to.window(self.driver.window_handles[0])
 
-        # image_addresses = self.driver.find_elements(By.TAG_NAME, "img")
-
-
-
 
 if __name__ == "__main__":
     df = pd.read_csv(
@@ -170,9 +158,9 @@ if __name__ == "__main__":
     image_scraper.driver.switch_to.window(image_scraper.driver.window_handles[0])
     time.sleep(1)
 
-    for i in range(2):        
+    for i in range(2):
         collection = image_scraper.get_collection_title(i)
-        
+
         links = image_scraper.get_image_addresses_of_the_collection(collection)
         path = "NFTs/" + df.iat[i, 8] + "/" + df.iat[i, 8]
         image_scraper.collect_images(links, path)

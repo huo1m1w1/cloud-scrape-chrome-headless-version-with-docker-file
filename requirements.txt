@@ -8,3 +8,5 @@ SQLAlchemy==1.4.37
 urllib3==1.26.9
 webdriver-manager==3.7.0
 uuid
+Flask==1.0.2
+gunicorn==19.9.0

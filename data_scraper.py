@@ -3,7 +3,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import uuid
 import time
@@ -49,11 +48,12 @@ class NFT_scraper:
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920x1080")
         options.add_argument("start-maximised")
-        options.add_argument("user-agent=[Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36]")
+        options.add_argument(
+            "user-agent=[Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36]"
+        )
         s = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=s, options=options)               
-        # self.driver.get("chrome://settings/")
-        # self.driver.execute_script("chrome.settingsPrivate.setDefaultZoom(0.20);")
+        self.driver = webdriver.Chrome(service=s, options=options)
+
         return self.driver.get(url)
 
     def collect_screen_data(self):
@@ -90,17 +90,6 @@ class NFT_scraper:
 
         self.driver.execute_script("window.scrollBy(0 , 3200 );")
 
-
-    # def scrolling_down_to_bottom(self):
-    #     """
-    #     scrolling down the page to bottom
-
-    #     """
-
-    #     html = self.driver.find_element_by_tag_name("html")
-    #     html.send_keys(Keys.END)
-    #     time.sleep(1)
-
     def merging_table(self, df, df2):
         df = pd.concat([df, df2], ignore_index=False)
         # df = df.drop_duplicates()
@@ -136,17 +125,15 @@ if __name__ == "__main__":
     driver = scraper.Web_driver()
 
     for i in range(2):
-        
+
         for i in range(5):
             time.sleep(3)
             data = scraper.collect_screen_data()
             scraper.merging_table(scraper.table, data)
             scraper.scrolling_screen_down()
         scraper.click_to_next_page()
-    scraper.table.drop_duplicates('Collection')
+    scraper.table.drop_duplicates("Collection")
     unique_ids = [uuid.uuid4() for i in range(len(scraper.table))]
     scraper.table["uuid"] = unique_ids
-    scraper.table.to_csv(
-        'nft_ranking1.csv'
-    )
+    scraper.table.to_csv("nft_ranking1.csv")
     scraper.driver.quit()

@@ -1,13 +1,15 @@
 from sqlalchemy import create_engine
-from  data_scraper import NFT_scraper
-from  image_scraper import Image_scraper
+from data_scraper import NFT_scraper
+from image_scraper import Image_scraper
 import pandas as pd
 import time
 import uuid
-from security_keys import password
+from security_keys import (
+    password,
+)  # build your own security_key.py file, please check readme
 
 """
-Collecting data and save to postgresql on AWS RDS
+Collecting data save to postgresql on AWS RDS
 """
 
 scraper = NFT_scraper()
@@ -25,14 +27,14 @@ scraper.table = pd.DataFrame(
 )
 driver = scraper.Web_driver()
 for i in range(2):
-    
+    # using scrolling down function to get all the data bit by bit
     for i in range(5):
         time.sleep(3)
         data = scraper.collect_screen_data()
         scraper.merging_table(scraper.table, data)
         scraper.scrolling_screen_down()
     scraper.click_to_next_page()
-scraper.table.drop_duplicates('Collection')
+scraper.table.drop_duplicates("Collection")
 
 unique_ids = [uuid.uuid4() for i in range(len(scraper.table))]
 scraper.table["uuid"] = unique_ids
@@ -42,7 +44,7 @@ DBAPI = "psycopg2"
 # change to your own AWS RDS address
 ENDPOINT = "nfts.cftyhhxl7vmx.eu-west-2.rds.amazonaws.com"
 USER = "postgres"
-PASSWORD = password  # enter your own password here
+PASSWORD = password
 PORT = 5432
 DATABASE = "postgres"
 engine = create_engine(
@@ -58,7 +60,7 @@ scraper.driver.quit()
 Collecting images and save to AWS S3
 """
 
-scraper.table.drop_duplicates('Collection')
+scraper.table.drop_duplicates("Collection")
 image_scrape = Image_scraper(scraper.table)
 driver = image_scrape.Web_driver()
 image_scrape.driver.execute_script("window.open('');")
@@ -71,4 +73,3 @@ for i in range(2):
     path = "NFTs/" + str(scraper.table.iat[i, 8]) + "/" + str(scraper.table.iat[i, 8])
     image_scrape.collect_images(links, path)
 image_scrape.driver.quit()
-

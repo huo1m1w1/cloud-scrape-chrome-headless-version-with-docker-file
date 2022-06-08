@@ -1,37 +1,33 @@
+# build python environment
 FROM python:3.9-buster
 
-RUN apt-get update 
-RUN apt-get install -y gconf-service libasound2 libatk1.0-0 libcairo2 libcups2 libfontconfig1 libgdk-pixbuf2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libxss1 fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils
+# Adding trusting keys to apt for repositories,
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 
-RUN apt-get install -y wget \
-  && rm -rf /var/lib/apt/lists/*
+# get Google Chrome
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
 
+# update apt-get
+RUN apt-get -y update
 
-#download and install chrome
-RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
+# install google-chrome-stable
+RUN apt-get install -y google-chrome-stable
 
-#install python dependencies
+# get chromedriver
+RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux64.zip
+
+# get unzip package
+RUN apt-get install -yqq unzip
+
+# unzip chromedriver
+RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+
+# copy requiremnts/packages needed, and get installed
 COPY requirements.txt requirements.txt 
 RUN pip install -r ./requirements.txt 
 
-#some envs
-ENV APP_HOME /app 
-ENV PORT 5000
+# copy all files
+COPY . . 
 
-#set workspace
-WORKDIR ${APP_HOME}
-
-#copy local files
-COPY .. 
-
-CMD exec gunicorn --bind :${PORT} --workers 1 --threads 8 main:app
-
-
-
-
-
-
-
-
-
+# run the application
+CMD [ "python", "main.py" ]
