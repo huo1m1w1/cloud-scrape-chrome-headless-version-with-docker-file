@@ -1,0 +1,11 @@
+version: 0.1
+
+phases:
+  build:
+    commands:
+      - docker build -d cloud-scraper .
+
+    post_build:
+      - eval 'aws ecr grt-login --region eu-west-2'
+      - docker tag cloud-scraper:lastest 760338309845.dkr.ecr.eu-west-2.amazonaws.com/cloud-scraper:latest
+      - docker push 760338309845.dkr.ecr.eu-west-2.amazonaws.com/cloud-scraper:latest
