@@ -71,16 +71,16 @@ root@ip-172-31-29-136:/opt/prometheus-2.26.0.linux-amd64# sudo chown -R promethe
 
 root@ip-172-31-29-136:/opt/prometheus-2.26.0.linux-amd64# cat /etc/prometheus/prometheus.yml
 
-# my global config
-global:
-  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-  # scrape_timeout is set to the global default (10s).
+<!-- " # my global config
+" global:
+"  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+"  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+"  # scrape_timeout is set to the global default (10s).
 
-# Alertmanager configuration
-alerting:
-  alertmanagers:
-  - static_configs:
+" # Alertmanager configuration
+" alerting:
+"   alertmanagers:
+"  - static_configs:
     - targets:
       # - alertmanager:9093
 
@@ -99,7 +99,7 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-    - targets: ['localhost:9090']
+    - targets: ['localhost:9090'] -->
 
 
 root@ip-172-31-29-136:/opt/prometheus-2.26.0.linux-amd64# sudo -u prometheus /usr/local/bin/prometheus \
@@ -160,7 +160,7 @@ root@ip-172-31-29-136:/etc/prometheus# sudo systemctl restart prometheus
 root@ip-172-31-29-136:/etc/prometheus# cd /etc/prometheus
 root@ip-172-31-29-136:/etc/prometheus# sudo nano prometheus.yml
 copy following:
-# my global config
+<!-- # my global config
 global:
   scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
   evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
@@ -179,7 +179,7 @@ rule_files:
   # - "second_rules.yml"
 
 # A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
+# Here it's Prometheus itself. -->
 
 root@ip-172-31-29-136:/etc/prometheus# sudo systemctl restart prometheus
 root@ip-172-31-29-136:/etc/prometheus# sudo nano prometheus.yml
