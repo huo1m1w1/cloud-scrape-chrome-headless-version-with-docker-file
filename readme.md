@@ -189,7 +189,7 @@ root@ip-172-31-29-136:/etc/prometheus#  sudo systemctl start node_exporter
 root@ip-172-31-29-136:/etc/prometheus# sudo systemctl status node_exporter
 
 ### if Note_exporter not available, cope following to /etc/systemd/system/node_exporter.service
- [Unit]
+ <!-- [Unit]
  Description=Prometheus Node Exporter
  After=network.target
  User=prometheus
@@ -201,7 +201,7 @@ root@ip-172-31-29-136:/etc/prometheus# sudo systemctl status node_exporter
  ExecStart=/bin/sh -c '/usr/local/bin/node_exporter'
 
  [Install]
- WantedBy=multi-user.target
+ WantedBy=multi-user.target -->
                            
 root@ip-172-31-29-136:/etc/prometheus# sudo vim /etc/systemd/system/node_exporter.service
 root@ip-172-31-29-136:/etc/prometheus# sudo systemctl daemon-reload
