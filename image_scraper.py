@@ -1,14 +1,15 @@
+import time
+
+import boto3
+import pandas as pd
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-import time
-import requests
-from selenium.webdriver.chrome.service import Service
-import pandas as pd
-from security_keys import access_key
-from security_keys import secret_key
-import boto3
+
+from security_keys import access_key, secret_key
 
 
 class Image_scraper:
@@ -22,7 +23,7 @@ class Image_scraper:
         self.second_url = ""
         self.df = df
 
-    def Web_driver(self):
+    def web_driver(self):
 
         """
         Preparing selenium chrome webdriver
@@ -60,31 +61,27 @@ class Image_scraper:
         """
         time.sleep(2)
         elem = self.driver.find_element(
-            By.XPATH, "//*[@id='__next']/div/div[1]/nav/div[2]/div/div/div/input"
+            By.CSS_SELECTOR,
+            '#__next > div > div.sc-d040ow-3.kCqGcl > nav > div.sc-1xf18x6-0.bSaLsG > div.sc-1xf18x6-0.sc-1twd32i-0.hzdGQw.kKpYwv > div > div > div > div > div > input[type=text]',
         )
+
         elem.send_keys(collection)
-        time.sleep(2)
-        self.driver.find_element(
-            By.XPATH, '//*[@id="NavSearch--results"]/li[2]/a/div[2]/div/div/span'
-        ).click()
+        time.sleep(6)
+        self.driver.find_element(By.XPATH, '//*[@id="NavSearch--results"]/li[2]/a/div[2]').click()
 
         # scroll the page to an appropriate level
         self.driver.maximize_window()
-        time.sleep(2)
+        time.sleep(4)
         level = self.driver.find_element(
             By.CSS_SELECTOR,
-            "#main > div > div > div.sc-1xf18x6-0.sc-z0wxa3-0.gczeyg.hWJuuu > div > div.sc-1po1rbf-6.bUKivE > div.sc-1xf18x6-0.bozbIq.AssetSearchView--main > div.AssetSearchView--results.collection--results.AssetSearchView--results--phoenix > div.fresnel-container.fresnel-greaterThanOrEqual-md > div > p",
+            "#main > div > div > div.sc-1xf18x6-0.sc-z0wxa3-0.hnKAL.hWJuuu > div > div.sc-1po1rbf-6.bUKivE > div.sc-1xf18x6-0.cPWSa-d.AssetSearchView--main > div.AssetSearchView--results.collection--results.AssetSearchView--results--phoenix > div.fresnel-container.fresnel-greaterThanOrEqual-md > div",
         )
 
         self.driver.execute_script("arguments[0].scrollIntoView(true);", level)
-
         time.sleep(2)
         d = self.driver.find_elements(By.XPATH, '//div[@role = "gridcell"]')
-
         d = self.driver.find_elements(By.XPATH, "//a[contains(@href, 'assets')]")
-
         links = [i.get_attribute("href") for i in d]
-
         return links
 
     def collect_images(self, links, path):
@@ -95,18 +92,12 @@ class Image_scraper:
         """
 
         self.driver.switch_to.window(self.driver.window_handles[1])
-
-        session = boto3.Session(
-            aws_access_key_id=access_key, aws_secret_access_key=secret_key
-        )
-
+        session = boto3.Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
         s3 = session.resource("s3")
-
         for i in range(len(links) - 1):
             self.driver.get(links[i + 1])
 
             # switch to the link in a new tab by sending key strokes on the element
-
             time.sleep(1)
             image = self.driver.find_element(
                 By.XPATH,
@@ -118,6 +109,7 @@ class Image_scraper:
             object.put(Body=r.content)
             time.sleep(5)
         self.driver.switch_to.window(self.driver.window_handles[0])
+        self.driver.get(self.url)
 
     def collect_images1(self, links, path):
         """
@@ -130,30 +122,22 @@ class Image_scraper:
         self.driver.switch_to.window(self.driver.window_handles[1])
 
         for i in range(len(links) - 1):
-            try:
-
-                self.driver.get(links[i + 1])
-
-                time.sleep(1)
-                image = self.driver.find_element(
-                    By.XPATH,
-                    "//*[@id='main']/div/div/div/div[1]/div/div[1]/div[1]/article/div/div/div/div/img",
-                )
-                r = requests.get(image.get_attribute("src"))
-                with open(path + str(i + 1) + ".jpg", "wb") as f:
-                    f.write(r.content)
-            except:
-                continue
-
+            self.driver.get(links[i + 1])
+            time.sleep(1)
+            image = self.driver.find_element(
+                By.XPATH,
+                "//*[@id='main']/div/div/div/div[1]/div/div[1]/div[1]/article/div/div/div/div/img",
+            )
+            r = requests.get(image.get_attribute("src"))
+            with open(path + str(i + 1) + ".jpg", "wb") as f:
+                f.write(r.content)
         self.driver.switch_to.window(self.driver.window_handles[0])
 
 
 if __name__ == "__main__":
-    df = pd.read_csv(
-        "nft_ranking1.csv", index_col=0
-    )  # this is going introduce from rds or inter memory.
+    df = pd.read_csv("nft_ranking1.csv", index_col=0)  # this is going introduce from rds or inter memory.
     image_scraper = Image_scraper(df)
-    driver = image_scraper.Web_driver()
+    driver = image_scraper.web_driver()
     image_scraper.driver.execute_script("window.open('');")
     image_scraper.driver.switch_to.window(image_scraper.driver.window_handles[0])
     time.sleep(1)

@@ -1,13 +1,19 @@
 # import requirements
 
+import time
+import uuid
+
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-import uuid
-import time
 from selenium.webdriver.chrome.service import Service
-import pandas as pd
+from selenium.webdriver.common.by import By
+from sqlalchemy import create_engine
+from webdriver_manager.chrome import ChromeDriverManager
+
+from security_keys import (
+    password,
+)  # build your own security_key.py file, please check readme
 
 
 class NFT_scraper:
@@ -33,8 +39,7 @@ class NFT_scraper:
                 "Items",
             ]
         )
-
-    def Web_driver(self):
+    def web_driver(self):
 
         """
         Prepare selenium chrome webdriver for scraping, set appropriate zoom of window,
@@ -68,7 +73,7 @@ class NFT_scraper:
         )
         data_split = [i.text for i in row_data][0].split("\n")
         row_table = [
-            data_split[i * 8 : (i + 1) * 8] for i in range(int(len(data_split) / 8))
+            data_split[i*8:(i+1)*8] for i in range(int(len(data_split)/8))
         ]
 
         df = pd.DataFrame(
@@ -87,12 +92,11 @@ class NFT_scraper:
         return df
 
     def scrolling_screen_down(self):
-
+        # scrolling down by 3200 vertically
         self.driver.execute_script("window.scrollBy(0 , 3200 );")
 
     def merging_table(self, df, df2):
         df = pd.concat([df, df2], ignore_index=False)
-        # df = df.drop_duplicates()
         df["Rank"] = df["Rank"].astype(str).astype(int)
         self.table = df.sort_values(by=["Rank"])
         return self.table
@@ -105,6 +109,20 @@ class NFT_scraper:
 
     def save_table(self):
         self.table.to_csv("nft_ranking1.csv")
+
+    def db_engine(self):
+        DATABASE_TYPE = "postgresql"
+        DBAPI = "psycopg2"
+        # change to your own AWS RDS address
+        ENDPOINT = "nfts.cftyhhxl7vmx.eu-west-2.rds.amazonaws.com"
+        USER = "postgres"
+        PASSWORD = password
+        PORT = 5432
+        DATABASE = "postgres"
+        engine = create_engine(
+            f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}"
+        )
+        return engine
 
 
 if __name__ == "__main__":
@@ -122,17 +140,16 @@ if __name__ == "__main__":
             "Items",
         ]
     )
-    driver = scraper.Web_driver()
+    driver = scraper.web_driver()
 
     for i in range(2):
-
-        for i in range(5):
+        for j in range(5):
             time.sleep(3)
             data = scraper.collect_screen_data()
             scraper.merging_table(scraper.table, data)
             scraper.scrolling_screen_down()
         scraper.click_to_next_page()
-    scraper.table.drop_duplicates("Collection")
+    scraper.table = scraper.table.drop_duplicates("Rank")
     unique_ids = [uuid.uuid4() for i in range(len(scraper.table))]
     scraper.table["uuid"] = unique_ids
     scraper.table.to_csv("nft_ranking1.csv")
