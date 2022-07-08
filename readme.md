@@ -9,6 +9,9 @@ secret_key = "..."
 
 password = "..."
 
+alternatively, use github secrets to setup credential file
+
+
 . AWS infrastructure setting: AWS RDS PostgreSQL database with name of "cloud-scraper" and S3 bucket with name of "cloud-scraper"
 
 Create docker image use following command
@@ -72,15 +75,15 @@ root@ip-172-31-29-136:/opt/prometheus-2.26.0.linux-amd64# sudo chown -R promethe
 root@ip-172-31-29-136:/opt/prometheus-2.26.0.linux-amd64# cat /etc/prometheus/prometheus.yml
 
 <!-- " # my global config
-" global:
-"  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-"  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-"  # scrape_timeout is set to the global default (10s).
+global:
+ scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
 
-" # Alertmanager configuration
-" alerting:
-"   alertmanagers:
-"  - static_configs:
+ # Alertmanager configuration
+ alerting:
+   alertmanagers:
+  - static_configs:
     - targets:
       # - alertmanager:9093
 
@@ -213,10 +216,12 @@ root@ip-172-31-29-136:/etc/prometheus# sudo systemctl status node_exporter
 
 ## CI/CD 
 
+### run ci/cd in github action 
 
 Contact
 Michael Mingwang Huo - https://www.linkedin.com/in/mingwang-huo-5b7a3548/ - huomingwang@hotmail.com
 
-Project Link: https://github.com/huo1m1w1/Cloud-scraper
+Project Link: https://github.com/huo1m1w1/cloud-scrape-chrome-headless-version-with-docker-file
 
 Acknowledgments
+  Thank you very much to Blair for his support and code review!
