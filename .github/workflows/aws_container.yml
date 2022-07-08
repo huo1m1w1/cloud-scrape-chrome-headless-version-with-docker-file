@@ -10,7 +10,7 @@ env:
   CONTAINER_NAME: client
   ECR_REGISTRY: 760338309845.dkr.ecr.eu-west-2.amazonaws.com
   ECR_REPO: cloud-scraper
-  ECS_CLUSTER: scraper
+  ECS_CLUSTER: cloud-scraper
   ECS_TD: first-run-task-definition
   ECS_SV: sample-app-service
 
