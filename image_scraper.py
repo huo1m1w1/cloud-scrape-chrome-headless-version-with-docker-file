@@ -92,7 +92,7 @@ class Image_scraper:
         """
 
         self.driver.switch_to.window(self.driver.window_handles[1])
-        session = boto3.Session(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+        session = boto3.Session(aws_access_key_id=secrets.AWS_ACCESS_KEY_ID, aws_secret_access_key=secrets.SECRET_KEY)
         s3 = session.resource("s3")
         for i in range(len(links) - 1):
             self.driver.get(links[i + 1])
