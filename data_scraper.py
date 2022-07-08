@@ -10,11 +10,11 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from sqlalchemy import create_engine
 from webdriver_manager.chrome import ChromeDriverManager
-
+import os
 from security_keys import (
     password,
 )  # build your own security_key.py file, please check readme
-
+PASSWORD = os.environ['PASSWORD']
 
 class NFT_scraper:
 

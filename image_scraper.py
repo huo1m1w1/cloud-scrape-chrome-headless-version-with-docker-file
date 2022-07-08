@@ -8,10 +8,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-
+import os 
 from security_keys import access_key, secret_key
-
-
+ACCESS_KEY=os.environ['ACCESS_KEY']
+SECRET_KEY=os.environ['SECRET_KEY']
 class Image_scraper:
 
     """
@@ -92,7 +92,7 @@ class Image_scraper:
         """
 
         self.driver.switch_to.window(self.driver.window_handles[1])
-        session = boto3.Session(aws_access_key_id=secrets.AWS_ACCESS_KEY_ID, aws_secret_access_key=secrets.SECRET_KEY)
+        session = boto3.Session(aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=SECRET_KEY)
         s3 = session.resource("s3")
         for i in range(len(links) - 1):
             self.driver.get(links[i + 1])
