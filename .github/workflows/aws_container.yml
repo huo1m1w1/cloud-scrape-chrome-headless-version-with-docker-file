@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: eu-west-2
-  CONTAINER_NAME: client
+  CONTAINER_NAME: sample-app
   ECR_REGISTRY: 760338309845.dkr.ecr.eu-west-2.amazonaws.com
   ECR_REPO: cloud-scraper
   ECS_CLUSTER: cloud-scraper
