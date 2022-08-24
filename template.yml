@@ -103,6 +103,13 @@ Resources:
               - 9090
             networks:
               - monitoring
+              
+          # run docker app
+          # scraper:
+          #   image: h1m1w1/cloud-scraper:scrapertag
+          #   container_name: scraper
+          #   restart: unless-stopped
+          
         " > docker-compose.yaml
         echo "
         global:
