@@ -1,0 +1,129 @@
+Resources:
+  AppSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: For ssh on port 22 access and 8080 port access for Customer App
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: "8080"
+          ToPort: "8080"
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: "9090"
+          ToPort: "9090"
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: "3000"
+          ToPort: "3000"
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: "9100"
+          ToPort: "9100"
+          CidrIp: 0.0.0.0/0          
+  AppAndMonitor:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0d5eff06f840b45e9 # ImageId depends on a region. The current image is valid ONLY in US-EAST-1
+      KeyName: lt-key
+      SecurityGroups:
+        - !Ref AppSG
+      UserData: !Base64 |
+        #!/bin/sh
+        export PATH=/usr/local/bin:$PATH;
+
+        yum update
+        yum install docker -y
+        service docker start
+        # Docker login notes:
+        #   - For no email, just put one blank space.
+        #   - Also the private repo protocol and version are needed for docker
+        #     to properly setup the .dockercfg file to work with compose
+        docker login --username="h1m1w1" --password="16@October" --email="h1m1w1@googlemail.com" https://index.docker.io/v1/
+        mv /root/.dockercfg /home/ec2-user/.dockercfg
+        chown ec2-user:ec2-user /home/ec2-user/.dockercfg
+        usermod -a -G docker ec2-user
+        curl -L https://github.com/docker/compose/releases/download/v2.10.0/docker-compose-linux-x86_64 > /usr/local/bin/docker-compose
+        
+        chmod +x /usr/local/bin/docker-compose
+        chown root:docker /usr/local/bin/docker-compose
+        mkdir /etc/prometheus/
+
+
+        echo "
+        version: '3.8'
+
+        networks:
+          monitoring:
+            driver: bridge
+            
+        volumes:
+          prometheus_data: {}
+
+        services:
+          node-exporter:
+            image: prom/node-exporter:latest
+            container_name: node-exporter
+            restart: unless-stopped
+            volumes:
+              - /proc:/host/proc:ro
+              - /sys:/host/sys:ro
+              - /:/rootfs:ro
+            command:
+              - '--path.procfs=/host/proc'
+              - '--path.rootfs=/rootfs'
+              - '--path.sysfs=/host/sys'
+              - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+            expose:
+              - 9100
+            networks:
+              - monitoring
+
+          prometheus:
+            image: prom/prometheus:latest
+            container_name: prometheus
+            restart: unless-stopped
+            volumes:
+              - '/$(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml'
+              - '/$(pwd)/prometheus_data:/prometheus'
+              # - './prometheus.yml:/etc/prometheus/prometheus.yml'
+              # - prometheus_data:/prometheus
+              
+            command:
+              - '--config.file=/etc/prometheus/prometheus.yml'
+              - '--storage.tsdb.path=/prometheus'
+              - '--web.console.libraries=/etc/prometheus/console_libraries'
+              - '--web.console.templates=/etc/prometheus/consoles'
+              - '--web.enable-lifecycle'
+            expose:
+              - 9090
+            networks:
+              - monitoring
+        " > docker-compose.yaml
+        echo "
+        global:
+          scrape_interval: 1m
+
+        scrape_configs:
+          - job_name: "prometheus"
+            scrape_interval: 1m
+            static_configs:
+            - targets: ["localhost:9090"]
+
+          - job_name: "node"
+            static_configs:
+            - targets: ["node-exporter:9100"]
+
+        remote_write:
+          - url: "https://prometheus-prod-10-prod-us-central-0.grafana.net/api/prom/push"
+            basic_auth:
+              username: "h1m1w1"
+              password: "eyJrIjoiY2RhZmJiNTk1MzJlNzFlZmIwODIzMDY0YzVkYWQzMGIxYTFiZWU4ZSIsIm4iOiJhd3MtZWMyIiwiaWQiOjY5ODQ4Nn0="
+        " > prometheus.yaml
+        # Run docker-compose
+        # chown ec2-user:ec2-user /home/ec2-user/docker-compose.yml
+        /usr/local/bin/docker-compose up -d
