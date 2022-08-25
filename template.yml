@@ -43,7 +43,8 @@ Resources:
         #   - For no email, just put one blank space.
         #   - Also the private repo protocol and version are needed for docker
         #     to properly setup the .dockercfg file to work with compose
-        docker login --username="h1m1w1" --password="16@October" --email="h1m1w1@googlemail.com" https://index.docker.io/v1/
+        #  # docker log in 
+        #  docker login --username="h1m1w1" --password=env.password --email="h1m1w1@googlemail.com" https://index.docker.io/v1/
         mv /root/.dockercfg /home/ec2-user/.dockercfg
         chown ec2-user:ec2-user /home/ec2-user/.dockercfg
         usermod -a -G docker ec2-user
