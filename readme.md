@@ -13,7 +13,13 @@ Login to AWS cloudformation, create a stack with template.yml, that's it.
 
 
 # Alternative way:
-Use github action, choose deploy to ecs, then run ci/cd with buildspec.yml 
+Use github action, choose deploy to ecs
+Or run ci/cd on WAS codebuild with buildspec.yml 
+
+
+
+
+
 
 Contact
 Michael Mingwang Huo - https://www.linkedin.com/in/mingwang-huo-5b7a3548/ - huomingwang@hotmail.com
