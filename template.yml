@@ -53,7 +53,10 @@ Resources:
         chmod +x /usr/local/bin/docker-compose
         chown root:docker /usr/local/bin/docker-compose
         mkdir /etc/prometheus/
-
+        
+        # use stefanprodan tamplate to build prometheus and grafana to monitor docker container
+        git clone https://github.com/stefanprodan/dockprom            
+        sudo ADMIN_USER=admin ADMIN_PASSWORD=admin /usr/local/bin/docker-compose -f /dockprom/docker-compose.yml up -d
 
         # Run docker-compose
         # chown ec2-user:ec2-user /home/ec2-user/docker-compose.yml
