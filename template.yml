@@ -30,6 +30,7 @@ Resources:
       InstanceType: t2.micro
       ImageId: ami-0d5eff06f840b45e9 # ImageId depends on a region. The current image is valid ONLY in US-EAST-1
       KeyName: lt-key
+      IamInstanceProfile: s3-admin
       SecurityGroups:
         - !Ref AppSG
       UserData: !Base64 |
