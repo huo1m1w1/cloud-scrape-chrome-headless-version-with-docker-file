@@ -9,7 +9,7 @@ Create an AWS account,  a key pair named 'lt-key', and a role with s3 full acces
 
 AWS infrastructure setting: AWS RDS PostgreSQL database with name of "cloud-scraper" and S3 bucket with name of "cloud-scraper".
 
-Login to AWS cloudformation, create a stack with template.yml, that's it.
+Login to AWS cloudformation console, create a stack with template.yml, that's it.
 
 
 # Alternative way:
